@@ -1,0 +1,37 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cc: [gcc, clang]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install valgrind
+        run: sudo apt-get update && sudo apt-get install -y valgrind
+
+      - name: Build
+        run: make CC=${{ matrix.cc }}
+
+      - name: Parser unit tests
+        run: make CC=${{ matrix.cc }} unit
+
+      - name: Integration tests
+        run: make CC=${{ matrix.cc }} integration
+
+      - name: All tests with AddressSanitizer + UBSan
+        run: |
+          # ASan can crash at startup with the high mmap randomisation on
+          # newer runner kernels.
+          sudo sysctl vm.mmap_rnd_bits=28
+          make CC=${{ matrix.cc }} sanitize
+
+      - name: Parser unit tests under Valgrind
+        run: make CC=${{ matrix.cc }} valgrind
