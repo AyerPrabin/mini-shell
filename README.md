@@ -85,7 +85,8 @@ It works in two passes:
    argument.
    - Inside `'...'` everything is literal, including `\` and `$`.
    - Inside `"..."`, `$NAME` is expanded, and `\` only escapes `"`, `\` and
-     `$` (any other backslash is kept as is, like in sh).
+     `$` (any other backslash is kept as is). This is a subset of sh's
+     rules, which also let `\` escape a backquote and a newline.
    - Outside quotes, `\` makes the next character plain, so `a\ b` is one
      word and `\|` is not a pipe.
    - Quoted and unquoted pieces next to each other join into one word:
