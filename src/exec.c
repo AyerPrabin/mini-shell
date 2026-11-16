@@ -99,6 +99,11 @@ static void child(Shell *sh, Command *cmd, int in_fd, int out_fd, int unused_fd,
     /* The shell ignores or catches these; the program should not. */
     signal(SIGINT, SIG_DFL);
     signal(SIGQUIT, SIG_DFL);
+    /* An ignored signal stays ignored across exec. If whatever started the
+     * shell ignored SIGPIPE (the CI runner does), `seq 1 100000 | head -n 1`
+     * would leave seq printing "Broken pipe" errors instead of quietly
+     * dying, so put it back to the default. */
+    signal(SIGPIPE, SIG_DFL);
 
     if (background) {
         /* Own process group, so a Ctrl-C meant for the foreground does not
