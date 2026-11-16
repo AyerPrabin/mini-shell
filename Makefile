@@ -7,7 +7,7 @@ SAN_FLAGS = -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -Werror -pedantic -
 SHELL_SRC = src/main.c src/parser.c src/exec.c src/builtins.c
 HDR = src/parser.h src/shell.h
 
-.PHONY: all test unit sanitize valgrind clean
+.PHONY: all test unit integration sanitize valgrind clean
 
 all: msh
 
@@ -28,10 +28,14 @@ test_parser_san: tests/test_parser.c src/parser.c src/parser.h
 unit: test_parser
 	./test_parser
 
-test: unit
+integration: msh
+	sh tests/integration.sh ./msh
+
+test: unit integration
 
 sanitize: test_parser_san msh_san
 	./test_parser_san
+	sh tests/integration.sh ./msh_san
 
 valgrind: test_parser
 	valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1 ./test_parser
